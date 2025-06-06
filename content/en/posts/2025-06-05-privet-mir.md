@@ -1,6 +1,6 @@
 ---
-title: "Привет, мир!"
-description: "Мой первый пост на Nuxt Content + shadcn-vue"
+title: "Hello world!"
+description: "My first post on Nuxt Content + shadcn-vue"
 pubDate: "2025-06-05"
 slug: "privet-mir"
 ---
