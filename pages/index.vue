@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import { useAsyncData } from '#app'
+import { useI18n } from '#imports'
 import { Button } from '~/components/ui/button'
 import { Card } from '~/components/ui/card'
 
-// Получаем все записи из папки content
-const { data: posts } = await useAsyncData(() =>
-  queryCollection('content').path('/').all()
+const { locale } = useI18n()
+const { data: posts } = await useAsyncData(
+  'recent-posts',
+  () =>
+    queryContent(`${locale.value}/posts`)
+      .sort({ pubDate: -1 })
+      .limit(3)
+      .find(),
+  { watch: [locale] }
 )
+
+const prefix = computed(() => (locale.value === 'en' ? '' : `/${locale.value}`))
 </script>
 
 <template>
@@ -62,16 +71,16 @@ const { data: posts } = await useAsyncData(() =>
     <!-- Recent Posts Section -->
     <section class="text-center py-20">
       <div class="container mx-auto">
-        <h2 class="text-3xl font-semibold mb-6">Recent posts</h2>
+        <h2 class="text-3xl font-semibold mb-6">{{ $t('recent_posts') }}</h2>
         <div class="grid md:grid-cols-3 gap-8">
           <Card v-for="post in posts" :key="post.path" class="p-6">
             <h3 class="text-xl font-bold mb-2">
-              <nuxt-link :to="`/posts/${post.slug}`" class="hover:underline">
+              <nuxt-link :to="`${prefix}/posts/${post.slug}`" class="hover:underline">
                 {{ post.title }}
               </nuxt-link>
             </h3>
             <p class="text-gray-600 mb-4">{{ post.description }}</p>
-            <Button as="a" :href="`/posts/${post.slug}`" variant="link">Read more</Button>
+            <Button as="a" :href="`${prefix}/posts/${post.slug}`" variant="link">{{ $t('read_more') }}</Button>
           </Card>
         </div>
       </div>
