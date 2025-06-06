@@ -19,11 +19,13 @@ export default defineNuxtConfig({
   ],
   i18n: {
     locales: [
-      { code: 'en', language: 'en-US', name: "English" },
-      { code: 'ru', language: 'ru-RU', name: "Русский" }
+      { code: 'en', language: 'en-US', name: 'English', files: ['en.json'] },
+      { code: 'ru', language: 'ru-RU', name: 'Русский', files: ['ru.json'] }
     ],
     defaultLocale: 'en',
     strategy: 'prefix_except_default',
+    langDir: 'locales',
+    restructureDir: '',
   },
   colorMode: {
     classSuffix: ''
