@@ -1,21 +1,16 @@
 <script setup lang="ts">
 import { useAsyncData } from '#app'
+
 import { useI18n } from '#imports'
 import { Button } from '~/components/ui/button'
 import { Card } from '~/components/ui/card'
 
 const { locale } = useI18n()
-const { data: posts } = await useAsyncData(
-  'recent-posts',
-  () =>
-    queryContent(`${locale.value}/posts`)
-      .sort({ pubDate: -1 })
-      .limit(3)
-      .find(),
-  { watch: [locale] }
-)
+console.log(`User locale: ${locale.value}`);
 
+const postr = ref(await useAsyncData(async () => queryCollection(locale.value).all()));
 const prefix = computed(() => (locale.value === 'en' ? '' : `/${locale.value}`))
+console.log(postr.value.data);
 </script>
 
 <template>
@@ -29,7 +24,7 @@ const prefix = computed(() => (locale.value === 'en' ? '' : `/${locale.value}`))
        <div class="absolute inset-0 bg-black/30"></div>
 
       <div class="relative text-center text-white px-4">
-        <h1 class="text-5xl font-bold mb-4">Payload Website Template</h1>
+        <h1 class="text-5xl font-bold mb-4">Gamania test</h1>
         <p class="mb-6 text-lg">
           The code for this template is completely open-source and can be found on our Github.
         </p>
@@ -73,14 +68,14 @@ const prefix = computed(() => (locale.value === 'en' ? '' : `/${locale.value}`))
       <div class="container mx-auto">
         <h2 class="text-3xl font-semibold mb-6">{{ $t('recent_posts') }}</h2>
         <div class="grid md:grid-cols-3 gap-8">
-          <Card v-for="post in posts" :key="post.path" class="p-6">
+          <Card v-for="post in postr.data" class="p-6">
             <h3 class="text-xl font-bold mb-2">
-              <nuxt-link :to="`${prefix}/posts/${post.slug}`" class="hover:underline">
+              <nuxt-link :to="`${post.path}`" class="hover:underline">
                 {{ post.title }}
               </nuxt-link>
             </h3>
             <p class="text-gray-600 mb-4">{{ post.description }}</p>
-            <Button as="a" :href="`${prefix}/posts/${post.slug}`" variant="link">{{ $t('read_more') }}</Button>
+            <Button as="a" :href="`${post.path}`" variant="link">{{ $t('read_more') }}</Button>
           </Card>
         </div>
       </div>
