@@ -9,7 +9,7 @@ const { locale } = useI18n()
 console.log(`User locale: ${locale.value}`);
 
 const postr = ref(await useAsyncData(async () => queryCollection(locale.value).all()));
-const prefix = computed(() => (locale.value === 'en' ? '' : `/${locale.value}`))
+
 console.log(postr.value.data);
 </script>
 
