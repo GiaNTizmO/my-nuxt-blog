@@ -4,6 +4,7 @@ description: "Мой первый пост на Nuxt Content + shadcn-vue"
 pubDate: "2025-06-05"
 slug: "2025-06-05-privet-mir"
 bgimg: "image-post1.webp"
+tKey: "post-2025-06-05-hello-world"
 ---
 
 # Здравствуйте!

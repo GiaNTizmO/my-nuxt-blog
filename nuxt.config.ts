@@ -2,10 +2,9 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  ssr: false,
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
-  ssr: true,
+  ssr: false,
   css: ['~/assets/css/tailwind.css'],
   modules: [
     '@nuxt/eslint',
@@ -15,9 +14,25 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode',
-    '@nuxtjs/color-mode',
+    '@nuxtjs/i18n',
     'shadcn-nuxt',
   ],
+  i18n: {
+    defaultLocale: 'ru',
+    strategy: 'prefix_except_default',
+    locales: [
+      { code: 'ru', iso: 'ru-RU', name: 'Русский', file: 'ru.json' },
+      { code: 'en', iso: 'en-US', name: 'English', file: 'en.json' },
+    ],
+    lazy: true,
+    langDir: 'locales',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root',
+    },
+    vueI18n: './i18n.config.ts',
+  },
   colorMode: {
     classSuffix: ''
   },

@@ -3,6 +3,7 @@ import { queryCollection } from '#imports'
 
 const route = useRoute()
 const slug = String(route.params.slug)
+const prefix = computed(() => route.path.startsWith('/en') ? '/en' : '')
 
 type PostDoc = {
   path: string
@@ -17,16 +18,35 @@ type PostDoc = {
   media?: string | null
 }
 
-const currentPath = `/posts/${slug}`
+const currentPath = computed(() => `${prefix.value}/posts/${slug}`)
 
 const { data: post } = await useAsyncData<PostDoc | null>(
   `post-${slug}`,
-  () => queryCollection('content').path(currentPath).first() as any
+  async () => {
+    let doc = await queryCollection('content').path(currentPath.value).first() as any
+    if (!doc && prefix.value) {
+      // Try RU fallback by slug
+      const fallback = await queryCollection('content').path(`/posts/${slug}`).first() as any
+      if (fallback?.meta?.tKey) {
+        // Try to find proper localized doc by shared translation key
+        const candidates = await queryCollection('content').where('path', 'LIKE', `${prefix.value}/posts/%`).all() as any[]
+        const alt = candidates.find(d => d?.meta?.tKey === fallback.meta.tKey)
+        if (alt) {
+          if (import.meta.client && alt.path !== route.path) await navigateTo(alt.path)
+          return alt
+        }
+      }
+      return fallback
+    }
+    return doc
+  },
+  { watch: [prefix] }
 )
 
 const { data: allPosts } = await useAsyncData<PostDoc[]>(
   'all-posts',
-  () => queryCollection('content').where('path', 'LIKE', '/posts/%').all() as any
+  () => queryCollection('content').where('path', 'LIKE', `${prefix.value || ''}/posts/%`).all() as any,
+  { watch: [prefix] }
 )
 
 const mediaType = computed(() => {
@@ -49,15 +69,16 @@ const mediaSrc = computed(() => {
   return p?.video ?? p?.bgimg ?? p?.media ?? p?.meta?.video ?? p?.meta?.bgimg ?? p?.meta?.media ?? null
 })
 
+const localeTag = computed(() => (prefix.value === '/en' ? 'en-US' : 'ru-RU'))
 const publishedDate = computed(() => {
   const p = post.value as any
   const d = p?.pubDate ?? p?.meta?.pubDate
-  return d ? new Date(d as string).toLocaleDateString('ru-RU') : ''
+  return d ? new Date(d as string).toLocaleDateString(localeTag.value) : ''
 })
 
 const randomPosts = computed(() => {
   const posts = (allPosts.value as unknown as PostDoc[]) || []
-  const filtered = posts.filter(p => p.path !== currentPath)
+  const filtered = posts.filter(p => p.path !== currentPath.value)
   return filtered.sort(() => 0.5 - Math.random()).slice(0, 2)
 })
 
@@ -95,8 +116,8 @@ if (!post.value) {
       <div class="relative z-10 text-white max-w-4xl mx-auto px-4 pt-20">
         <h1 class="text-4xl md:text-6xl font-bold mb-6">{{ (post as PostDoc)?.title }}</h1>
         <div class="text-white/80 mb-6">
-          <p class="text-lg">Автор: Gamania</p>
-          <p class="text-lg">Дата публикации: {{ publishedDate }}</p>
+          <p class="text-lg">{{ $t('post.author') }}: Gamania</p>
+          <p class="text-lg">{{ $t('post.published') }}: {{ publishedDate }}</p>
         </div>
         <div class="text-xl md:text-2xl mb-8 opacity-90 leading-relaxed">
           {{ (post as PostDoc)?.description }}
@@ -114,7 +135,7 @@ if (!post.value) {
 
     <section v-if="randomPosts.length > 0" class="py-20">
       <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-semibold mb-8 text-center">Связанные посты</h2>
+        <h2 class="text-3xl font-semibold mb-8 text-center">{{ $t('post.related') }}</h2>
         <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           <div
             v-for="relatedPost in randomPosts"

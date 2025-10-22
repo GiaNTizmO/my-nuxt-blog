@@ -4,6 +4,7 @@ description: "Демонстрация поддержки видео в пост
 pubDate: "2025-01-15"
 slug: "2025-01-15-video-example"
 video: "sample-video.mp4"
+tKey: "post-2025-01-15-video"
 ---
 
 # Пост с видео

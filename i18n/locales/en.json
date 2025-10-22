@@ -1,0 +1,22 @@
+{
+  "nav": {"posts": "Posts", "contact": "Contact"},
+  "lang": {"ru": "Russian", "en": "English"},
+  "hero": {
+    "title": "Gamania.Me",
+    "subtitle": "A blog about everything you need",
+    "buttons": {"recent": "Recent posts", "allPosts": "All posts", "contact": "Contact"}
+  },
+  "features": {
+    "title": "Core features",
+    "admin": {"title": "Admin Dashboard", "text": "Manage this site's pages and posts from the admin dashboard."},
+    "preview": {"title": "Preview", "text": "Use drafts and preview before publishing."},
+    "builder": {"title": "Page Builder", "text": "Create unique layouts for any kind of content."},
+    "seo": {"title": "SEO", "text": "Full control over SEO data and site content."},
+    "dark": {"title": "Dark Mode", "text": "Respects preferred color scheme."}
+  },
+  "recentPosts": {"title": "Recent posts"},
+  "cta": {"title": "Looking for more posts?", "button": "All posts"},
+  "postsIndex": {"title": "All posts"},
+  "post": {"author": "Author", "published": "Published on", "related": "Related posts"},
+  "footer": {"copyright": "© 2025 Gamania.Me — All rights reserved"}
+}
