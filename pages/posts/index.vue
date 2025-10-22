@@ -1,32 +1,42 @@
 <script setup lang="ts">
-import { useAsyncData, useRoute } from '#app'
-import type { ContentDocument } from '@nuxt/content'
+import { Card } from '~/components/ui/card'
 
-// Получаем текущую локаль из i18n
-const route = useRoute()
-const locale = route.params.locale || 'en'
-// Если вы выбрали стратегию prefix_except_default, то 
-// для defaultLocale (en) params.locale может быть undefined.
-// Тогда нас устроит «en» как дефолт.
-
-const { data: posts } = await useAsyncData<ContentDocument[]>(`posts-${locale}`, () =>
-  queryContent(`${locale}/posts`)
-    .sort({ pubDate: -1 })
-    .find()
+// Получаем все посты из папки content/posts через API
+const { data: postsResponse } = await useAsyncData('all-posts', () => 
+  $fetch('/api/posts')
 )
+
+const posts = computed(() => postsResponse.value?.posts || [])
+
+// Логируем данные для отладки
+console.log('Posts data:', posts.value)
+
+// Определяем тип для постов
+type Post = {
+  _path: string
+  title: string
+  description: string
+  pubDate: string
+  slug: string
+  content: string
+  bgimg?: string | null
+  video?: string | null
+  media?: string | null
+}
 </script>
 
 <template>
-  <div class="container mx-auto py-8">
-    <h1 class="text-3xl font-bold mb-6">
-      {{ $t('posts') }} <!-- этот ключ из vueI18n.messages -->
-    </h1>
-    <ul class="space-y-4">
-      <li v-for="post in posts" :key="post._path">
-        <NuxtLink :to="`/${locale}/posts/${post.slug}`" class="text-blue-600 hover:underline">
-          {{ post.title }}
-        </NuxtLink>
-      </li>
-    </ul>
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">Все посты</h1>
+    
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div 
+            v-for="post in (posts as Post[])" 
+            :key="post._path" 
+            class="h-96"
+          >
+            <PostCard :post="post as any" />
+          </div>
+        </div>
   </div>
-</template>
+</template> 

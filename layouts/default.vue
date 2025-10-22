@@ -1,36 +1,23 @@
 <template>
-  <!-- Оборачиваем всё в один контейнер -->
-  <div class="">
-    <!-- Header становится фиксированным и прозрачным -->
-    <header class="absolute top-0 left-0 w-full h-16 z-20">
-      <div
-        class="container mx-auto h-full flex items-center justify-between px-6"
-      >
-        <nuxt-link to="/" class="text-xl font-bold">Logo</nuxt-link>
+  <div>
+    <!-- Header -->
+    <header class="absolute top-0 left-0 right-0 z-50">
+      <div class="container mx-auto flex justify-between items-center py-4 px-6">
+        <nuxt-link to="/" class="text-xl font-bold text-white">Gamania</nuxt-link>
         <nav class="space-x-4">
-          <nuxt-link
-            to="/posts"
-            >Posts</nuxt-link
-          >
-          <nuxt-link
-            to="/contact"
-            >Contact</nuxt-link
-          >
+          <nuxt-link to="/posts" class="text-white/90 hover:text-white transition-colors">Посты</nuxt-link>
+          <nuxt-link to="/contact" class="text-white/90 hover:text-white transition-colors">Контакты</nuxt-link>
+          <!--<input type="text" placeholder="Поиск" class="border border-white/30 rounded px-2 py-1 bg-white/10 text-white placeholder-white/70 focus:bg-white/20 focus:border-white/50 transition-all" />-->
         </nav>
       </div>
     </header>
-
-    <!-- Main: с отступом сверху, равным высоте Header (h-16 = 4rem = 64px) -->
-    <main>
+    
+    <main class="p-6 pt-0">
       <slot />
     </main>
-
-    <!-- Footer остаётся внизу без изменений -->
-    <footer class="border-t py-6 text-center">
-      <div class="container mx-auto">
-        <nuxt-link to="/" class="text-xl font-bold">Logo</nuxt-link>
-        <p class="mt-2">© 2025 Мой Блог</p>
-      </div>
+    
+    <footer class="border-t py-4 text-center">
+      © 2025 Gamania.Me - Все права принадлежат правообладателям
     </footer>
   </div>
 </template>
