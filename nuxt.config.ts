@@ -6,6 +6,10 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: true,
   css: ['~/assets/css/tailwind.css'],
+  app: {
+    baseURL: '/my-nuxt-blog/', // baseURL: '/<repository>/'
+    buildAssetsDir: 'assets', // don't use "_" at the begining of the folder name to avoids nojkill conflict
+  },
   modules: [
     '@nuxt/eslint',
     '@nuxt/fonts',
