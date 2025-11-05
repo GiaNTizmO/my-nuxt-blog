@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   ssr: true,
   css: ['~/assets/css/tailwind.css'],
   app: {
-    baseURL: '/my-nuxt-blog/', // baseURL: '/<repository>/'
+    baseURL: '/', // baseURL: '/<repository>/'
     buildAssetsDir: 'assets', // don't use "_" at the begining of the folder name to avoids nojkill conflict
   },
   modules: [
