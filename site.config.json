@@ -1,0 +1,14 @@
+{
+  "title": "gamania.me",
+  "description": "Notes on code, tools, reverse engineering and life outside the screen.",
+  "repository": "https://github.com/GiaNTizmO/my-nuxt-blog",
+  "branch": "master",
+  "url": "https://gamania.me",
+  "descriptionRu": "Заметки о коде, технологиях и жизни за пределами экрана.",
+  "giscus": {
+    "repo": "GiaNTizmO/my-nuxt-blog",
+    "repoId": "R_kgDOO23TSw",
+    "category": "Comments",
+    "categoryId": ""
+  }
+}

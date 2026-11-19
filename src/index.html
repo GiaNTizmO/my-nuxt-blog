@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Notes on programming, how technology works, reverse engineering and life outside the screen.">
+<meta name="theme-color" content="#f7f8f2"><title>gamania.me — IT blog</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="alternate" type="application/rss+xml" title="gamania.me — RSS" href="./feed.xml">
+<link rel="stylesheet" href="./style.css">
+<script>try{if(localStorage.getItem('vglub-theme')==='dark')document.documentElement.dataset.theme='dark'}catch{}</script>
+<script type="module" src="./app.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a><div class="reading-progress" id="reading-progress"></div>
+<header class="header wrap">
+<a class="brand" href="#/" aria-label="gamania.me"><span>gamania<span class="brand-dot">.me</span></span></a>
+<nav class="main-nav" aria-label="Основная навигация"><a href="#/" data-nav="home">Статьи</a><a href="#/archive" data-nav="archive">Архив</a><a href="#/about" data-nav="about">О блоге</a></nav>
+<div class="header-actions"><button class="search-trigger" id="open-search" aria-label="Поиск по статьям"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span>Поиск</span><kbd>⌘ K</kbd></button><span class="action-divider"></span><button class="icon-button lang-toggle" id="lang-toggle" aria-label="Читать на русском">RU</button><button class="icon-button" id="theme-toggle" aria-label="Включить тёмную тему"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 14.1A8.2 8.2 0 0 1 9.9 4a8.3 8.3 0 1 0 10.2 10.2Z"/></svg></button></div>
+</header>
+<main id="main" tabindex="-1"><div class="loading wrap">Loading…</div></main>
+<footer class="footer wrap"><div><a class="footer-brand" href="#/">gamania.me</a><span id="footer-tagline">An IT blog about code and tools.</span></div><div class="footer-links"><a href="./feed.xml" id="footer-rss">RSS <span>↗</span></a><a href="#/about" id="footer-source">О проекте <span>↗</span></a><button class="motion-toggle" id="motion-toggle" aria-pressed="false"></button><span class="footer-year">© 2026 Gamania</span></div></footer>
+<dialog id="search-dialog" aria-labelledby="search-title"><div class="search-head"><h2 id="search-title">Найти в блоге</h2><button class="icon-button" id="close-search" aria-label="Закрыть поиск">✕</button></div><label class="search-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="search-input" type="search" placeholder="Тема, технология или мысль…" autocomplete="off"></label><div id="search-results" aria-live="polite"></div><div class="search-foot"><span>Поиск по заголовкам, тегам и тексту</span><kbd>esc</kbd></div></dialog>
+<div class="toast" role="status" id="toast"></div>
+</body></html>
