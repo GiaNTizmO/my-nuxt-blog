@@ -12,6 +12,7 @@ if(config.url&&!/^https?:\/\//.test(config.url))throw new Error('site.config.jso
 const escape=s=>String(s).replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
 marked.use({renderer:{code({text,lang}){const language=(lang||'').split(/\s/)[0];const value=language&&hljs.getLanguage(language)?hljs.highlight(text,{language}).value:escape(text);return `<pre><code class="hljs language-${escape(language)}">${value}</code></pre>`;}}});
 const posts=[];
+const postAssets=new Set();
 // Posts live in content/posts/<lang>/<slug>.md. The same slug in both folders = translations of one article.
 const LANGS=['en','ru'];
 const files=[];for(const lang of LANGS){for(const f of (await readdir(path.join('content/posts',lang)).catch(()=>[])).filter(f=>f.endsWith('.md')).sort())files.push({lang,file:`${lang}/${f}`});}
@@ -21,13 +22,24 @@ for(const {lang,file} of files){const raw=await readFile(path.join('content/post
  const date=data.date instanceof Date?data.date.toISOString().slice(0,10):String(data.date);if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||Number.isNaN(Date.parse(date)))throw new Error(`Invalid date: ${file}`);
  const allowed=['code','reverse','tools','life'];if(!allowed.includes(data.category))throw new Error(`Unknown category: ${file}`);
  const text=content.replace(/```[\s\S]*?```/g,' ').replace(/[#*`>\[\]()]/g,' ').replace(/\s+/g,' ').trim();
- posts.push({slug,lang,file,title:String(data.title),description:String(data.description),category:data.category,date,tags:Array.isArray(data.tags)?data.tags:[],featured:Boolean(data.featured),demo:Boolean(data.demo),wip:Boolean(data.wip),art:data.art||'code',minutes:Math.max(1,Math.ceil(content.split(/\s+/).length/180)),html:marked.parse(content),text});
+ const html=marked.parse(content,{
+  walkTokens(token){
+   if(token.type!=='image'||!token.href.startsWith('assets/'))return;
+   const assetPath=path.posix.normalize(token.href);
+   if(!assetPath.startsWith('assets/'))throw new Error(`Invalid image path in ${file}: ${token.href}`);
+   const relativePath=`content/posts/${lang}/${assetPath}`;
+   postAssets.add(relativePath);
+   token.href=`./${relativePath.split('/').map(encodeURIComponent).join('/')}`;
+  },
+ });
+ posts.push({slug,lang,file,title:String(data.title),description:String(data.description),category:data.category,date,tags:Array.isArray(data.tags)?data.tags:[],featured:Boolean(data.featured),demo:Boolean(data.demo),wip:Boolean(data.wip),art:data.art||'code',minutes:Math.max(1,Math.ceil(content.split(/\s+/).length/180)),html,text});
 }
 if(new Set(posts.map(p=>p.lang+'/'+p.slug)).size!==posts.length)throw new Error('Duplicate post slug');
 posts.sort((a,b)=>b.date.localeCompare(a.date));await rm(out,{recursive:true,force:true});await mkdir(path.join(out,'vendor'),{recursive:true});await cp('src',out,{recursive:true});
 await cp('node_modules/three/build/three.module.js',path.join(out,'vendor/three.module.js'));await cp('node_modules/three/build/three.core.js',path.join(out,'vendor/three.core.js'));await cp('node_modules/dompurify/dist/purify.es.mjs',path.join(out,'vendor/purify.es.mjs'));
 await cp('node_modules/three/LICENSE',path.join(out,'vendor/THREE-LICENSE.txt'));await cp('node_modules/dompurify/LICENSE',path.join(out,'vendor/DOMPURIFY-LICENSE.txt'));
 for(const lang of LANGS)await mkdir(path.join(out,'content/posts',lang),{recursive:true});for(const p of posts)await cp(path.join('content/posts',p.file),path.join(out,'content/posts',p.file));
+for(const asset of postAssets)await cp(asset,path.join(out,asset));
 await writeFile(path.join(out,'content.json'),JSON.stringify({config,posts}));await writeFile(path.join(out,'.nojekyll'),'');
 // Custom domain for GitHub Pages (e.g. gamania.me), taken from the site URL.
 const host=new URL(config.url).hostname;if(!host.endsWith('github.io'))await writeFile(path.join(out,'CNAME'),host+String.fromCharCode(10));
