@@ -8,10 +8,11 @@
     "check": "node --check src/app.js && node --check src/i18n.js && node --check src/background.js && node --check scripts/build.mjs"
   },
   "dependencies": {
-    "three": "^0.181.1",
-    "marked": "^17.0.0",
     "dompurify": "^3.3.0",
     "gray-matter": "^4.0.3",
-    "highlight.js": "^11.11.1"
+    "highlight.js": "^11.11.1",
+    "marked": "^17.0.0",
+    "mermaid": "^12.3.0",
+    "three": "^0.181.1"
   }
 }

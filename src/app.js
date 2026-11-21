@@ -10,6 +10,8 @@ let data = { posts: [], config: {} };
 let selected = 'all';
 let cleanupScene = () => {};
 let renderVersion = 0;
+let diagramVersion = 0;
+let diagramRender = Promise.resolve();
 
 // ---------- language ----------
 // Routes look like #/en/archive or #/ru/post/slug. A route without a language
@@ -183,7 +185,48 @@ function article(slug) {
     + `<nav class="toc" aria-label="${s.onPage}"><h2 class="aside-heading">${s.onPage}</h2><div id="toc-links"></div></nav></div></article>`;
   $('#article-body').innerHTML = DOMPurify.sanitize(p.html, { USE_PROFILES: { html: true }, FORBID_TAGS: ['style', 'form', 'input', 'button'], FORBID_ATTR: ['style'] });
   enhanceArticle();
+  renderDiagrams();
   mountComments(p);
+}
+
+function renderDiagrams() {
+  const body = $('#article-body');
+  const diagrams = body?.querySelectorAll('.mermaid-diagram');
+  if (!diagrams?.length) return;
+
+  const version = ++diagramVersion;
+  const theme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'neutral';
+  const isCurrent = () => body.isConnected && version === diagramVersion;
+
+  // Mermaid uses shared configuration, so finish each render before switching themes.
+  diagramRender = diagramRender.then(async () => {
+    if (!isCurrent()) return;
+    const { default: mermaid } = await import('./vendor/mermaid/mermaid.esm.min.mjs');
+    if (!isCurrent()) return;
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      suppressErrorRendering: true,
+      theme,
+      htmlLabels: false,
+      fontFamily: 'Golos Text, sans-serif',
+      flowchart: { wrappingWidth: 190, rankSpacing: 28, nodeSpacing: 18, padding: 10 },
+    });
+
+    for (const [index, diagram] of diagrams.entries()) {
+      if (!isCurrent()) return;
+      const source = diagram.querySelector('pre');
+      const output = diagram.querySelector('.mermaid-output');
+      try {
+        const { svg } = await mermaid.render(`mermaid-${version}-${index}`, source.querySelector('code').textContent);
+        if (!isCurrent()) return;
+        output.innerHTML = svg;
+        source.hidden = true;
+      } catch (error) {
+        console.warn('Could not render a Mermaid diagram.', error);
+      }
+    }
+  }).catch(error => console.warn('Could not load Mermaid.', error));
 }
 
 // ---------- comments (Giscus, backed by GitHub Discussions) ----------
@@ -310,6 +353,7 @@ $('#theme-toggle').onclick = () => {
   themeLabel();
   document.dispatchEvent(new Event('themechange'));
   syncGiscusTheme();
+  renderDiagrams();
 };
 window.addEventListener('hashchange', route);
 window.addEventListener('scroll', () => {

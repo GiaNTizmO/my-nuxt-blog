@@ -10,7 +10,12 @@ if(repo){config.repository=`https://github.com/${repo}`;}
 if(process.env.SITE_URL)config.url=process.env.SITE_URL;
 if(config.url&&!/^https?:\/\//.test(config.url))throw new Error('site.config.json: url must use http(s)');
 const escape=s=>String(s).replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
-marked.use({renderer:{code({text,lang}){const language=(lang||'').split(/\s/)[0];const value=language&&hljs.getLanguage(language)?hljs.highlight(text,{language}).value:escape(text);return `<pre><code class="hljs language-${escape(language)}">${value}</code></pre>`;}}});
+marked.use({renderer:{code({text,lang}){
+ const language=(lang||'').split(/\s/)[0];
+ const value=language&&hljs.getLanguage(language)?hljs.highlight(text,{language}).value:escape(text);
+ const block=`<pre><code class="hljs language-${escape(language)}">${value}</code></pre>`;
+ return language==='mermaid'? `<div class="mermaid-diagram"><div class="mermaid-output"></div>${block}</div>` : block;
+}}});
 const posts=[];
 const postAssets=new Set();
 // Posts live in content/posts/<lang>/<slug>.md. The same slug in both folders = translations of one article.
@@ -38,6 +43,14 @@ if(new Set(posts.map(p=>p.lang+'/'+p.slug)).size!==posts.length)throw new Error(
 posts.sort((a,b)=>b.date.localeCompare(a.date));await rm(out,{recursive:true,force:true});await mkdir(path.join(out,'vendor'),{recursive:true});await cp('src',out,{recursive:true});
 await cp('node_modules/three/build/three.module.js',path.join(out,'vendor/three.module.js'));await cp('node_modules/three/build/three.core.js',path.join(out,'vendor/three.core.js'));await cp('node_modules/dompurify/dist/purify.es.mjs',path.join(out,'vendor/purify.es.mjs'));
 await cp('node_modules/three/LICENSE',path.join(out,'vendor/THREE-LICENSE.txt'));await cp('node_modules/dompurify/LICENSE',path.join(out,'vendor/DOMPURIFY-LICENSE.txt'));
+const mermaidDist='node_modules/mermaid/dist';
+const mermaidOut=path.join(out,'vendor/mermaid');
+await cp(path.join(mermaidDist,'mermaid.esm.min.mjs'),path.join(mermaidOut,'mermaid.esm.min.mjs'));
+await cp(path.join(mermaidDist,'chunks/mermaid.esm.min'),path.join(mermaidOut,'chunks/mermaid.esm.min'),{
+ recursive:true,
+ filter:source=>!source.endsWith('.map'),
+});
+await cp('node_modules/mermaid/LICENSE',path.join(mermaidOut,'LICENSE.txt'));
 for(const lang of LANGS)await mkdir(path.join(out,'content/posts',lang),{recursive:true});for(const p of posts)await cp(path.join('content/posts',p.file),path.join(out,'content/posts',p.file));
 for(const asset of postAssets)await cp(asset,path.join(out,asset));
 await writeFile(path.join(out,'content.json'),JSON.stringify({config,posts}));await writeFile(path.join(out,'.nojekyll'),'');

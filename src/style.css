@@ -23,3 +23,6 @@ body{background:transparent}
 .comments{margin-top:48px}
 .comments:empty{display:none}
 .comments .aside-heading{margin-bottom:16px}
+
+.mermaid-output:not(:empty){margin:0 0 22px;padding:12px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.mermaid-output > svg{width:100%;height:auto;margin-inline:auto}
