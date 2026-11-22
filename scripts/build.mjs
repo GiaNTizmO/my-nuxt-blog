@@ -29,10 +29,10 @@ for(const {lang,file} of files){const raw=await readFile(path.join('content/post
  const text=content.replace(/```[\s\S]*?```/g,' ').replace(/[#*`>\[\]()]/g,' ').replace(/\s+/g,' ').trim();
  const html=marked.parse(content,{
   walkTokens(token){
-   if(token.type!=='image'||!token.href.startsWith('assets/'))return;
-   const assetPath=path.posix.normalize(token.href);
-   if(!assetPath.startsWith('assets/'))throw new Error(`Invalid image path in ${file}: ${token.href}`);
-   const relativePath=`content/posts/${lang}/${assetPath}`;
+   if(token.type!=='image'||!/^(?:assets\/|\.\.\/(?:ru|en)\/assets\/)/.test(token.href))return;
+   const assetPath=path.posix.normalize(path.posix.join(lang,token.href));
+   if(!/^(?:ru|en)\/assets\//.test(assetPath))throw new Error(`Invalid image path in ${file}: ${token.href}`);
+   const relativePath=`content/posts/${assetPath}`;
    postAssets.add(relativePath);
    token.href=`./${relativePath.split('/').map(encodeURIComponent).join('/')}`;
   },
