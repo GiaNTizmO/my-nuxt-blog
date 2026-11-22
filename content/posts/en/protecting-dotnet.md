@@ -10,7 +10,7 @@ art: reverse
 ---
 ## Intro
 
-Today we will look at how software built on .NET can be protected.
+Today I’ll look at how software built on .NET can be protected.
 
 As of now (2025-11-09) the .NET ecosystem still has the same old problem. An assembly containing IL can be decompiled into readable C#, with some limitations.
 
@@ -25,7 +25,7 @@ This is where different protection approaches come in:
 3. Code virtualizers (a VM for IL opcodes)
 4. Compiling IL to native code ahead of time with .NET Native AOT or Unity IL2CPP
 
-Let's go through how each of them works in theory.
+I’ll start with how each approach works in theory.
 
 ## 1. Code obfuscation
 

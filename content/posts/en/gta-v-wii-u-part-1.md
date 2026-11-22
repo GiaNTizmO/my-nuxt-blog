@@ -122,9 +122,9 @@ IntroStage tick_intro(IntroStage stage, AssetState lights) {
 
 | What the loader reports | What happens on the next frame |
 |---|---|
-| Object missing from the package | Stay in `WaitForLights`. A minute from now we'll still be here. |
-| Object found and still loading | Keep waiting. It's on disk, but we can't put it in the scene yet. |
-| Object loaded | Move on to `PlayIntro`. |
+| Object missing from the package | The script stays in `WaitForLights`. A minute later it's still there. |
+| Object found and still loading | The script keeps waiting. The object is on disk but isn't ready for the scene yet. |
+| Object loaded | The script moves on to `PlayIntro`. |
 
 I converted the missing assets from the PC version and added their definitions to the package. The mission condition stayed the same. The script got its lights and moved on.
 

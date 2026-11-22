@@ -1,15 +1,15 @@
 ---
-title: "Wii U Internals: How dcbz found its way into our memset"
+title: "Wii U Internals: How I came to use dcbz in memset"
 date: '2026-11-22'
-description: "Measurements on a real Wii U showed when dcbz speeds up writes. Here’s how we used it in memset and checked that every fill stayed within bounds."
+description: "Measurements on a real Wii U showed when dcbz speeds up writes. Here’s how I used it in memset and checked that every fill stayed within bounds."
 category: code
 tags: [Wii U, Espresso, PowerPC, C++]
 art: cache
 ---
 
-On November 4 we ran RAGE HW Bench on a real Wii U. An ordinary loop wrote 8 MiB at about 165 MB/s. In the second loop we did an extra bit of work before writing each group of eight words: we zeroed the space they were about to occupy. Write speed jumped to about 1,017 MB/s. The game wasn't using that trick yet. That measurement was where our Espresso version of memset began.
+On November 4 I ran RAGE HW Bench on a real Wii U. An ordinary loop wrote 8 MiB at about 165 MB/s. In the second loop I did an extra bit of work before writing each group of eight words: I zeroed the space they were about to occupy. Write speed jumped to about 1,017 MB/s. The game wasn't using that trick yet. That measurement was where my Espresso version of memset began.
 
-**What RAGE HW Bench measured.** I pinned the benchmark thread to Espresso core 2 and ran two loops. The first wrote consecutive 32-bit words. The second issued the PowerPC instruction `dcbz` before writing each new cache line, then wrote the same eight words. Both loops computed the data they wrote as they went. The log gives us a direct comparison between those two write loops. It doesn't give us separate timings for calls to `memset(p, 0, n)` and `memset(p, 0xA5, n)`.
+**What RAGE HW Bench measured.** I pinned the benchmark thread to Espresso core 2 and ran two loops. The first wrote consecutive 32-bit words. The second issued the PowerPC instruction `dcbz` before writing each new cache line, then wrote the same eight words. Both loops computed the data they wrote as they went. The log directly compares those two write loops. It doesn't give separate timings for calls to `memset(p, 0, n)` and `memset(p, 0xA5, n)`.
 
 I repeated the measurement on hardware on November 12. Both pairs of bars use the same scale. Longer bars mean faster writes. Buffer sizes are in binary units, and throughput is in millions of bytes per second.
 
@@ -32,7 +32,7 @@ Why those sizes? This core has 512 KiB of L2 cache. The small buffer fits entire
 
 **What made it into the port.** The original newlib-style implementation already wrote whole words. It handled a few leading bytes to reach alignment, wrote four 32-bit words per iteration, then took care of the remainder. In build 327 I kept that path for requests **under 128 bytes**. For requests of 128 bytes or more, the code uses ordinary stores to reach a 32-byte boundary before filling whole cache lines. It also uses ordinary stores for any partial line at the end. The port's threshold is 128 **bytes**. The smaller benchmark buffer was 128 **KiB**. Two buffer sizes aren't enough to pin down an ideal cutoff.
 
-Here's the code from our platform file, `cafe_memops.cpp`. The eight assignments in the loop show exactly where a fill with an arbitrary byte differs from a zero fill.
+Here's the code from my platform file, `cafe_memops.cpp`. The eight assignments in the loop show exactly where a fill with an arbitrary byte differs from a zero fill.
 
 ~~~cpp
 inline void Dcbz(void* p) { __asm__ volatile("dcbz 0,%0" : : "r"(p) : "memory"); }
@@ -57,9 +57,9 @@ CAFE_MEMOPS_NOPATTERN void* FastMemset(void* dst, int c, size_t n)
 }
 ~~~
 
-The u32a type lets GCC store 32-bit words while respecting its aliasing rules. The macro before the function keeps the compiler from turning a recognizable fill loop into a library call: we're implementing memset itself here. For a zero fill, the condition inside the loop is false. Dcbz has already done all the writing that line needs. For any other fill byte, multiplying by 0x01010101 copies it into all four byte positions of the word.
+The u32a type lets GCC store 32-bit words while respecting its aliasing rules. The macro before the function keeps the compiler from turning a recognizable fill loop into a library call: I'm implementing memset itself here. For a zero fill, the condition inside the loop is false. Dcbz has already done all the writing that line needs. For any other fill byte, multiplying by 0x01010101 copies it into all four byte positions of the word.
 
-Take an aligned array and fill 130 bytes starting at offset 5. We'll leave a marker on either side:
+I take an aligned array and fill 130 bytes starting at offset 5. I leave a marker on either side:
 
 ~~~cpp
 alignas(32) unsigned char buf[160]{};
@@ -77,7 +77,7 @@ assert(buf[5] == 0xA5 && buf[134] == 0xA5);    // first and last bytes of the fi
 | 32–127: three whole lines | Issues dcbz for each line, then writes eight words of 0xA5A5A5A5. A zero fill would take just one dcbz per line. |
 | 128–134: last 7 bytes | Writes the remaining bytes one at a time. |
 
-Calling Dcbz(buf + 5) straight away would zero the line **containing** that address: bytes 0–31. Our 0x11 marker would disappear. The plain loop has no such constraint. It writes exactly the bytes or words we tell it to. With dcbz, the opportunity for a speedup comes when the entire line is ours to overwrite and we can save a read from memory. Even then, the state of the cache matters, as the lower pair of bars shows.
+Calling Dcbz(buf + 5) straight away would zero the line **containing** that address: bytes 0–31. The 0x11 marker would disappear. The plain loop has no such constraint. It writes exactly the bytes or words I tell it to. With dcbz, the opportunity for a speedup comes when I can overwrite the entire line and save a read from memory. Even then, the state of the cache matters, as the lower pair of bars shows.
 
 There's another limit. This path assumes ordinary cacheable memory with a write-back policy. It's unsuitable for device registers. If GX2 reads the buffer after the CPU has written it, the code that hands the buffer over is still responsible for making those writes visible to the GPU.
 
