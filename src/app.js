@@ -1,3 +1,4 @@
+import { icons } from './art.js';
 import DOMPurify from './vendor/purify.es.mjs';
 import { LANGS, DEFAULT_LANG, strings, feedFile } from './i18n.js';
 import { createBackground } from './background.js';
@@ -21,36 +22,29 @@ let lang = LANGS.includes(savedLang()) ? savedLang() : DEFAULT_LANG;
 const t = () => strings[lang];
 
 function parseHash() {
-  const parts = (location.hash.slice(1) || '/').split('/').filter(Boolean);
+  const route = location.hash.startsWith('#/') ? location.hash.slice(1) : document.body.dataset.route || '/';
+  const parts = route.split('/').filter(Boolean);
   if (LANGS.includes(parts[0])) lang = parts.shift();
   return '/' + parts.join('/');
 }
-const link = (path = '/') => `#/${lang}${path === '/' ? '' : path}`;
+const link = (path = '/') => `./#/${lang}${path === '/' ? '' : path}`;
 const langPosts = () => data.posts.filter(p => p.lang === lang);
 
 function setLang(next) {
   try { localStorage.setItem('vglub-lang', next); } catch {}
   const path = parseHash();
   lang = next;
-  location.hash = link(path);
+  const translation = data.posts.find(p => p.lang === next && path === '/post/' + p.slug);
+  location.href = translation ? articleHref(translation) : link(path);
 }
 
 // ---------- small helpers ----------
 const catName = c => t().categories[c] || c;
 const date = s => new Date(s + 'T12:00:00').toLocaleDateString(t().locale, { day: 'numeric', month: 'short' }).replace(' г.', '').replace('.', '');
 const count = c => langPosts().filter(p => p.category === c).length;
-const articleHref = p => link(`/post/${encodeURIComponent(p.slug)}`);
+const articleHref = p => `./${p.lang}/post/${encodeURIComponent(p.slug)}/`;
 const meta = p => `<div class="meta"><time datetime="${escapeHTML(p.date)}">${date(p.date)} ${p.date.slice(0, 4)}</time><span class="dot">·</span><span>${t().minRead(p.minutes)}</span></div>`;
 
-const icons = {
-  cache: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="18" y="20" width="64" height="60" rx="5"/><path d="M29 13v7m14-7v7m14-7v7m14-7v7M29 80v7m14-7v7m14-7v7m14-7v7M11 32h7m-7 12h7m-7 12h7m-7 12h7m64-36h7m-7 12h7m-7 12h7m-7 12h7"/><g stroke-width="3"><rect x="34" y="32" width="12" height="20" rx="5"/><rect x="54" y="32" width="12" height="20" rx="5"/></g><path d="M26 59h48v9H26zM32 59v9m6-9v9m6-9v9m6-9v9m6-9v9m6-9v9m6-9v9"/></svg>',
-  gta: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-linejoin="round"><path d="M9 19h34v6h-7l16 42 16-42h-8v-6h31v6h-8L59 82H44L18 25H9z"/><path d="m18 22 6 2 24 54h8l23-54 6-2M30 24l20 51"/></svg>',
-  code: '<span aria-hidden="true">{ / }</span>',
-  reverse: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width=".8"><path d="m50 10 34 19v41L50 90 16 70V29L50 10Z M16 29l34 20 34-20 M50 49v41 M33 20l34 20v40 M67 20 33 40v40 M16 49l34 20 34-20"/></svg>',
-  system: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1"><rect x="19" y="21" width="62" height="14" rx="2"/><rect x="19" y="43" width="62" height="14" rx="2"/><rect x="19" y="65" width="62" height="14" rx="2"/><path d="M28 28h2m-2 22h2m-2 22h2M36 28h26M36 50h26M36 72h26"/><circle cx="72" cy="28" r="1.6"/><circle cx="72" cy="50" r="1.6"/><circle cx="72" cy="72" r="1.6"/></svg>',
-  life: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 73h76M15 67l22-29 15 18 12-17 25 29M25 67l12-17 13 17M61 67l4-11 8 11"/><circle cx="65" cy="25" r="9"/><path d="M8 79h84"/></svg>',
-  terminal: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1"><rect x="13" y="22" width="74" height="57" rx="3"/><path d="M13 34h74M21 28h2m5 0h2m5 0h2M28 47l9 8-9 8M47 63h20"/></svg>',
-};
 const thumb = p => `<div class="thumb ${escapeHTML(p.art || 'code')}" aria-hidden="true">${icons[p.art] || icons.code}</div>`;
 
 const terminalArt = () => `<div class="terminal-art" aria-hidden="true"><div class="terminal-top"><i></i><i></i><i></i><span>hello_world.asm</span></div><div class="terminal-code"><span class="dim">01</span>  <span class="comment">; minimal program</span>
@@ -186,7 +180,7 @@ function article(slug) {
     + `<div class="article-bottom"><a href="${link('/')}">${s.back}</a>${mdLink}</div><section class="comments" id="comments" aria-label="${s.comments}"></section></div>`
     + `<nav class="toc" aria-label="${s.onPage}"><h2 class="aside-heading">${s.onPage}</h2><div id="toc-links"></div></nav></div></article>`;
   $('#article-body').innerHTML = DOMPurify.sanitize(p.html, { USE_PROFILES: { html: true }, FORBID_TAGS: ['style', 'form', 'input', 'button'], FORBID_ATTR: ['style'] });
-  enhanceArticle();
+  enhanceArticle(p);
   renderDiagrams();
   mountComments(p);
 }
@@ -256,7 +250,7 @@ function syncGiscusTheme() {
 }
 
 // Table of contents, external links and copy buttons for the rendered Markdown.
-function enhanceArticle() {
+function enhanceArticle(p) {
   const s = t(), body = $('#article-body');
   const headings = [...body.querySelectorAll('h2,h3')];
   headings.forEach((h, i) => h.id = `section-${i + 1}`);
@@ -269,7 +263,7 @@ function enhanceArticle() {
     b.onclick = () => copy(pre.querySelector('code')?.textContent || '');
     pre.append(b);
   });
-  $('#copy-link').onclick = () => copy(location.href);
+  $('#copy-link').onclick = () => copy(new URL(articleHref(p), document.baseURI).href);
 }
 
 function notFound() {
@@ -282,6 +276,10 @@ function route() {
   cleanupScene(); cleanupScene = () => {};
   const version = ++renderVersion;
   const path = parseHash();
+  if (location.hash.startsWith('#/') && path.startsWith('/post/')) {
+    const post = langPosts().find(p => path === '/post/' + p.slug);
+    if (post) { location.replace(articleHref(post)); return; }
+  }
   renderShell();
   background?.setDim(path.startsWith('/post/') ? 0.35 : 1);
   document.title = t().siteTitle;
@@ -359,7 +357,7 @@ $('#theme-toggle').onclick = () => {
 };
 window.addEventListener('hashchange', route);
 window.addEventListener('scroll', () => {
-  if (!location.hash.includes('/post/')) return;
+  if (!document.querySelector('#article-body')) return;
   const available = document.documentElement.scrollHeight - innerHeight;
   $('#reading-progress').style.width = `${available > 0 ? Math.min(100, scrollY / available * 100) : 100}%`;
 }, { passive: true });

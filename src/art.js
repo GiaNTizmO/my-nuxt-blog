@@ -1,0 +1,9 @@
+export const icons = {
+  cache: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="18" y="20" width="64" height="60" rx="5"/><path d="M29 13v7m14-7v7m14-7v7m14-7v7M29 80v7m14-7v7m14-7v7m14-7v7M11 32h7m-7 12h7m-7 12h7m-7 12h7m64-36h7m-7 12h7m-7 12h7m-7 12h7"/><g stroke-width="3"><rect x="34" y="32" width="12" height="20" rx="5"/><rect x="54" y="32" width="12" height="20" rx="5"/></g><path d="M26 59h48v9H26zM32 59v9m6-9v9m6-9v9m6-9v9m6-9v9m6-9v9m6-9v9"/></svg>',
+  gta: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-linejoin="round"><path d="M9 19h34v6h-7l16 42 16-42h-8v-6h31v6h-8L59 82H44L18 25H9z"/><path d="m18 22 6 2 24 54h8l23-54 6-2M30 24l20 51"/></svg>',
+  code: '<span aria-hidden="true">{ / }</span>',
+  reverse: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width=".8"><path d="m50 10 34 19v41L50 90 16 70V29L50 10Z M16 29l34 20 34-20 M50 49v41 M33 20l34 20v40 M67 20 33 40v40 M16 49l34 20 34-20"/></svg>',
+  system: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1"><rect x="19" y="21" width="62" height="14" rx="2"/><rect x="19" y="43" width="62" height="14" rx="2"/><rect x="19" y="65" width="62" height="14" rx="2"/><path d="M28 28h2m-2 22h2m-2 22h2M36 28h26M36 50h26M36 72h26"/><circle cx="72" cy="28" r="1.6"/><circle cx="72" cy="50" r="1.6"/><circle cx="72" cy="72" r="1.6"/></svg>',
+  life: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 73h76M15 67l22-29 15 18 12-17 25 29M25 67l12-17 13 17M61 67l4-11 8 11"/><circle cx="65" cy="25" r="9"/><path d="M8 79h84"/></svg>',
+  terminal: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1"><rect x="13" y="22" width="74" height="57" rx="3"/><path d="M13 34h74M21 28h2m5 0h2m5 0h2M28 47l9 8-9 8M47 63h20"/></svg>',
+};

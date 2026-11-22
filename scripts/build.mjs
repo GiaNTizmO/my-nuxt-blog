@@ -1,5 +1,6 @@
 import {mkdir,readFile,writeFile,cp,rm,readdir} from 'node:fs/promises';
 import path from 'node:path';
+import { writeSocialPages } from './social-pages.mjs';
 import matter from 'gray-matter';
 import {marked} from 'marked';
 import hljs from 'highlight.js';
@@ -7,7 +8,11 @@ const root=process.cwd(),out=path.join(root,'dist');
 const config=JSON.parse(await readFile('site.config.json','utf8'));
 const repo=process.env.GITHUB_REPOSITORY;
 if(repo){config.repository=`https://github.com/${repo}`;}
-if(process.env.SITE_URL)config.url=process.env.SITE_URL;
+if(process.env.SITE_URL){
+ const deployment=new URL(process.env.SITE_URL);
+ if(deployment.host===new URL(config.url).host)deployment.protocol=new URL(config.url).protocol;
+ config.url=deployment.href;
+}
 if(config.url&&!/^https?:\/\//.test(config.url))throw new Error('site.config.json: url must use http(s)');
 const escape=s=>String(s).replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
 marked.use({renderer:{code({text,lang}){
@@ -57,8 +62,9 @@ await writeFile(path.join(out,'content.json'),JSON.stringify({config,posts}));aw
 // Custom domain for GitHub Pages (e.g. gamania.me), taken from the site URL.
 const host=new URL(config.url).hostname;if(!host.endsWith('github.io'))await writeFile(path.join(out,'CNAME'),host+String.fromCharCode(10));
 const base=config.url.replace(/\/$/,'')+'/';
+await writeSocialPages({out,base,config,posts,escape});
 const feeds={en:{file:'feed.xml',description:config.description},ru:{file:'feed.ru.xml',description:config.descriptionRu||config.description}};
 const catNames={en:{code:'Programming',reverse:'Reverse engineering',tools:'IT & tools',life:'Life'},ru:{code:'Программирование',reverse:'Реверс-инжиниринг',tools:'IT и инструменты',life:'Жизнь'}};
 for(const [lang,f] of Object.entries(feeds)){const items=posts.filter(p=>p.lang===lang);await writeFile(path.join(out,f.file),`<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0"><channel><title>${escape(config.title)}</title><link>${escape(base)}</link><description>${escape(f.description)}</description><language>${lang}</language>${items.map(p=>`<item><title>${escape(p.title)}</title><link>${escape(base+'#/'+lang+'/post/'+p.slug)}</link><guid>${escape(base+'#/'+lang+'/post/'+p.slug)}</guid><description>${escape(p.description)}</description><pubDate>${new Date(p.date+'T12:00:00Z').toUTCString()}</pubDate><category>${escape(catNames[lang][p.category])}</category></item>`).join('')}</channel></rss>`);}
+<rss version="2.0"><channel><title>${escape(config.title)}</title><link>${escape(base)}</link><description>${escape(f.description)}</description><language>${lang}</language>${items.map(p=>`<item><title>${escape(p.title)}</title><link>${escape(base+lang+'/post/'+p.slug+'/')}</link><guid>${escape(base+'#/'+lang+'/post/'+p.slug)}</guid><description>${escape(p.description)}</description><pubDate>${new Date(p.date+'T12:00:00Z').toUTCString()}</pubDate><category>${escape(catNames[lang][p.category])}</category></item>`).join('')}</channel></rss>`);}
 console.log(`Built ${posts.length} Markdown posts → dist/ (base: ${base})`);
