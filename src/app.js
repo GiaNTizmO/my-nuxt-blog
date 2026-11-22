@@ -43,6 +43,7 @@ const articleHref = p => link(`/post/${encodeURIComponent(p.slug)}`);
 const meta = p => `<div class="meta"><time datetime="${escapeHTML(p.date)}">${date(p.date)} ${p.date.slice(0, 4)}</time><span class="dot">·</span><span>${t().minRead(p.minutes)}</span></div>`;
 
 const icons = {
+  gta: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-linejoin="round"><path d="M9 19h34v6h-7l16 42 16-42h-8v-6h31v6h-8L59 82H44L18 25H9z"/><path d="m18 22 6 2 24 54h8l23-54 6-2M30 24l20 51"/></svg>',
   code: '<span aria-hidden="true">{ / }</span>',
   reverse: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width=".8"><path d="m50 10 34 19v41L50 90 16 70V29L50 10Z M16 29l34 20 34-20 M50 49v41 M33 20l34 20v40 M67 20 33 40v40 M16 49l34 20 34-20"/></svg>',
   system: '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1"><rect x="19" y="21" width="62" height="14" rx="2"/><rect x="19" y="43" width="62" height="14" rx="2"/><rect x="19" y="65" width="62" height="14" rx="2"/><path d="M28 28h2m-2 22h2m-2 22h2M36 28h26M36 50h26M36 72h26"/><circle cx="72" cy="28" r="1.6"/><circle cx="72" cy="50" r="1.6"/><circle cx="72" cy="72" r="1.6"/></svg>',
