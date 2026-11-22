@@ -15,23 +15,20 @@ let diagramVersion = 0;
 let diagramRender = Promise.resolve();
 
 // ---------- language ----------
-// Routes look like #/en/archive or #/ru/post/slug. A route without a language
-// prefix falls back to the saved preference, then to English.
-const savedLang = () => { try { return localStorage.getItem('vglub-lang'); } catch { return null; } };
-let lang = LANGS.includes(savedLang()) ? savedLang() : DEFAULT_LANG;
+// The URL selects the language. Unprefixed routes use English.
+let lang = DEFAULT_LANG;
 const t = () => strings[lang];
 
 function parseHash() {
   const route = location.hash.startsWith('#/') ? location.hash.slice(1) : document.body.dataset.route || '/';
   const parts = route.split('/').filter(Boolean);
-  if (LANGS.includes(parts[0])) lang = parts.shift();
+  lang = LANGS.includes(parts[0]) ? parts.shift() : DEFAULT_LANG;
   return '/' + parts.join('/');
 }
 const link = (path = '/') => `./#/${lang}${path === '/' ? '' : path}`;
 const langPosts = () => data.posts.filter(p => p.lang === lang);
 
 function setLang(next) {
-  try { localStorage.setItem('vglub-lang', next); } catch {}
   const path = parseHash();
   lang = next;
   const translation = data.posts.find(p => p.lang === next && path === '/post/' + p.slug);
@@ -60,6 +57,7 @@ const terminalArt = () => `<div class="terminal-art" aria-hidden="true"><div cla
 function renderShell() {
   const s = t();
   document.documentElement.lang = lang;
+  $('.main-nav').setAttribute('aria-label', lang === 'ru' ? 'Основная навигация' : 'Main navigation');
   $('.skip-link').textContent = s.skip;
   $('.brand').href = link('/');
   $('.brand').setAttribute('aria-label', s.home);
